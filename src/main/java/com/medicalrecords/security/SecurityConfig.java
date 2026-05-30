@@ -36,10 +36,10 @@ public class SecurityConfig {
                 // Конфигурация на endpoint permissions
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Всички останали изискват authentication
+                        .requestMatchers("/api/doctors/**").permitAll()
+
                         .anyRequest().authenticated()
                 );
 
