@@ -1,17 +1,17 @@
 package com.medicalrecords.dto.patient;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO за създаване на нов пациент.
+ * DTO за редактиране на пациент.
  */
 @Getter
 @Setter
-public class PatientCreateRequest {
+public class PatientUpdateRequest {
 
     /**
      * Име на пациента.
@@ -38,16 +38,4 @@ public class PatientCreateRequest {
      */
     @NotNull(message = "Личният лекар е задължителен.")
     private Long personalDoctorId;
-
-    /**
-     * Потребителско име за вход.
-     */
-    @NotBlank(message = "Потребителското име е задължително.")
-    private String username;
-
-    /**
-     * Парола за вход.
-     */
-    @NotBlank(message = "Паролата е задължителна.")
-    private String password;
 }

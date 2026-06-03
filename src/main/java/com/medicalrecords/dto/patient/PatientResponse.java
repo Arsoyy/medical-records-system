@@ -21,7 +21,7 @@ public class PatientResponse {
     private String fullName;
 
     /**
-     * ЕГН.
+     * ЕГН на пациента.
      */
     private String egn;
 

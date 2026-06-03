@@ -1,7 +1,6 @@
 package com.medicalrecords.controller;
 
-import com.medicalrecords.dto.doctor.DoctorCreateRequest;
-import com.medicalrecords.dto.doctor.DoctorResponse;
+import com.medicalrecords.dto.doctor.*;
 import com.medicalrecords.service.DoctorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST контролер за работа с лекари.
+ * REST контролер за лекари.
  */
 @RestController
 @RequestMapping("/api/doctors")
@@ -21,15 +20,13 @@ public class DoctorController {
     private final DoctorService doctorService;
 
     /**
-     * Създава нов лекар.
-     *
-     * @param request данните за лекаря
-     * @return създаденият лекар
+     * Създава лекар.
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DoctorResponse createDoctor(
-            @Valid @RequestBody DoctorCreateRequest request
+            @Valid @RequestBody
+            DoctorCreateRequest request
     ) {
 
         return doctorService.createDoctor(request);
@@ -37,8 +34,6 @@ public class DoctorController {
 
     /**
      * Връща всички лекари.
-     *
-     * @return списък с лекари
      */
     @GetMapping
     public List<DoctorResponse> getAllDoctors() {
@@ -48,9 +43,6 @@ public class DoctorController {
 
     /**
      * Връща лекар по ID.
-     *
-     * @param id ID на лекаря
-     * @return информация за лекаря
      */
     @GetMapping("/{id}")
     public DoctorResponse getDoctorById(
@@ -61,9 +53,23 @@ public class DoctorController {
     }
 
     /**
-     * Изтрива лекар по ID.
-     *
-     * @param id ID на лекаря
+     * Обновява лекар.
+     */
+    @PutMapping("/{id}")
+    public DoctorResponse updateDoctor(
+            @PathVariable Long id,
+            @Valid @RequestBody
+            DoctorUpdateRequest request
+    ) {
+
+        return doctorService.updateDoctor(
+                id,
+                request
+        );
+    }
+
+    /**
+     * Изтрива лекар.
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

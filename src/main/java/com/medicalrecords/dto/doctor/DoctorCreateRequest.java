@@ -5,14 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO за създаване на лекар.
+ * DTO за създаване на нов лекар.
  */
 @Getter
 @Setter
 public class DoctorCreateRequest {
 
     /**
-     * Уникален идентификационен номер.
+     * Уникален идентификационен номер на лекаря.
      */
     @NotBlank(message = "Идентификационният номер е задължителен.")
     private String doctorIdentifier;
@@ -35,9 +35,9 @@ public class DoctorCreateRequest {
     private boolean canBePersonalDoctor;
 
     /**
-     * Username за login.
+     * Потребителско име.
      */
-    @NotBlank(message = "Username е задължителен.")
+    @NotBlank(message = "Потребителското име е задължително.")
     private String username;
 
     /**
