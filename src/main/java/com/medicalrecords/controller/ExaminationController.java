@@ -87,4 +87,23 @@ public class ExaminationController {
 
         return examinationService.getMyExaminations();
     }
+    @GetMapping("/doctor/my")
+    public List<ExaminationResponse>
+    getMyDoctorExaminations() {
+
+        return examinationService
+                .getMyDoctorExaminations();
+    }
+    @PostMapping("/doctor")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ExaminationResponse createExaminationAsDoctor(
+            @Valid @RequestBody
+            ExaminationCreateRequest request
+    ) {
+
+        return examinationService
+                .createExaminationAsDoctor(
+                        request
+                );
+    }
 }

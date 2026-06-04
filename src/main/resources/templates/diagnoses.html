@@ -66,6 +66,7 @@
             <th>Code</th>
             <th>Name</th>
             <th>Description</th>
+            <th>Actions</th>
         </tr>
         </thead>
 
@@ -97,12 +98,29 @@
                 data.forEach(diagnosis => {
 
                     table.innerHTML += `
-                        <tr>
-                            <td>${diagnosis.id}</td>
-                            <td>${diagnosis.code}</td>
-                            <td>${diagnosis.name}</td>
-                            <td>${diagnosis.description}</td>
-                        </tr>
+    <tr>
+
+        <td>${diagnosis.id}</td>
+
+        <td>${diagnosis.code}</td>
+
+        <td>${diagnosis.name}</td>
+
+        <td>${diagnosis.description}</td>
+
+        <td>
+
+            <button
+                class="btn btn-danger btn-sm"
+                onclick="deleteDiagnosis(${diagnosis.id})">
+
+                Delete
+
+            </button>
+
+        </td>
+
+    </tr>
                     `;
                 });
 
@@ -156,7 +174,41 @@
                 });
 
         });
+    function deleteDiagnosis(id) {
 
+        if (!confirm(
+            'Delete this diagnosis?'
+        )) {
+
+            return;
+        }
+
+        fetch('/api/diagnoses/' + id, {
+
+            method: 'DELETE'
+
+        })
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'Delete failed'
+                    );
+                }
+
+                loadDiagnoses();
+
+            })
+            .catch(error => {
+
+                console.error(error);
+
+                alert(
+                    'Error deleting diagnosis'
+                );
+            });
+    }
 </script>
 
 </body>

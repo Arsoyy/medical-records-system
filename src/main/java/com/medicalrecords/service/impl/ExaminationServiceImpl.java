@@ -310,4 +310,122 @@ public class ExaminationServiceImpl implements ExaminationService {
 
         return response;
     }
+    @Override
+    public List<ExaminationResponse> getMyDoctorExaminations() {
+
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        Doctor doctor =
+                doctorRepository.findAll()
+                        .stream()
+                        .filter(d ->
+                                d.getUser() != null &&
+                                        d.getUser().getId()
+                                                .equals(currentUser.getId())
+                        )
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Лекарят не беше намерен."
+                                ));
+
+        return examinationRepository.findAll()
+                .stream()
+                .filter(examination ->
+                        examination.getDoctor()
+                                .getId()
+                                .equals(doctor.getId())
+                )
+                .map(this::mapToResponse)
+                .toList();
+    }
+    @Override
+    public ExaminationResponse createExaminationAsDoctor(
+            ExaminationCreateRequest request
+    ) {
+
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        Doctor doctor =
+                doctorRepository.findAll()
+                        .stream()
+                        .filter(d ->
+                                d.getUser() != null &&
+                                        d.getUser().getId()
+                                                .equals(currentUser.getId())
+                        )
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Лекарят не беше намерен."
+                                ));
+
+        Patient patient =
+                patientRepository.findById(
+                                request.getPatientId()
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Пациентът не беше намерен."
+                                ));
+
+        Diagnosis diagnosis =
+                diagnosisRepository.findById(
+                                request.getDiagnosisId()
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Диагнозата не беше намерена."
+                                ));
+
+        Examination examination =
+                new Examination();
+
+        examination.setDoctor(doctor);
+
+        examination.setPatient(patient);
+
+        examination.setDiagnosis(diagnosis);
+
+        examination.setTreatment(
+                request.getTreatment()
+        );
+
+        examination.setPrice(
+                request.getPrice()
+        );
+
+        examination.setExaminationDate(
+                LocalDateTime.now()
+        );
+
+        examination.setPaymentType(
+                patient.isInsured()
+                        ? PaymentType.NHIF
+                        : PaymentType.PATIENT
+        );
+
+        Examination saved =
+                examinationRepository.save(
+                        examination
+                );
+
+        return mapToResponse(saved);
+    }
 }

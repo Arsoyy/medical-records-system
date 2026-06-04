@@ -29,13 +29,29 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
 
+                .formLogin(form -> form
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
+                )
+
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login?logout")
+                )
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
+                                SessionCreationPolicy.IF_REQUIRED
                         )
                 )
 
                 .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(
+                                "/login",
+                                "/css/**",
+                                "/js/**"
+                        )
+                        .permitAll()
 
                         // Само ADMIN има достъп до лекарите
                         .requestMatchers("/api/doctors/**")
@@ -43,6 +59,26 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/examinations/my")
                         .hasRole("PATIENT")
+
+                        .requestMatchers(
+                                "/api/examinations/doctor/my"
+                        )
+                        .hasRole("DOCTOR")
+
+                        .requestMatchers(
+                                "/api/examinations/doctor"
+                        )
+                        .hasRole("DOCTOR")
+
+                        .requestMatchers(
+                                "/api/patients/my"
+                        )
+                        .hasRole("DOCTOR")
+
+                        .requestMatchers(
+                                "/api/sick-leaves/my"
+                        )
+                        .hasRole("DOCTOR")
 
                         // ADMIN и DOCTOR
                         .requestMatchers(
@@ -58,10 +94,7 @@ public class SecurityConfig {
 
                         .anyRequest()
                         .authenticated()
-                )
-
-                // HTTP Basic Authentication
-                .httpBasic(httpBasic -> {});
+                );
 
         return http.build();
     }

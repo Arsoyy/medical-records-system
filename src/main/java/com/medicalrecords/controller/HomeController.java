@@ -55,4 +55,27 @@ public class HomeController {
     public String reportsPage() {
         return "reports";
     }
+
+    @GetMapping("/my-examinations")
+    public String myExaminationsPage() {
+        return "my-examinations";
+    }
+
+    @GetMapping("/doctor-examinations-page")
+    public String doctorExaminationsPage() {
+        return "doctor-examinations";
+    }
+    @GetMapping("/doctor-patients-page")
+    public String doctorPatientsPage() {
+        return "doctor-patients";
+    }
+
+    @GetMapping("/doctor-sick-leaves-page")
+    public String doctorSickLeavesPage() {
+        return "doctor-sick-leaves";
+    }
+    @GetMapping("/patient-history-page")
+    public String patientHistoryPage() {
+        return "patient-history";
+    }
 }

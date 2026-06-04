@@ -40,4 +40,6 @@ public interface PatientService {
      * Изтрива пациент.
      */
     void deletePatient(Long id);
+
+    List<PatientResponse> getMyPatients();
 }

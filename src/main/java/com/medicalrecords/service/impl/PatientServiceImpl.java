@@ -16,6 +16,7 @@ import com.medicalrecords.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.medicalrecords.util.*;
 
 import java.util.List;
 
@@ -202,7 +203,14 @@ public class PatientServiceImpl implements PatientService {
                                         "Пациентът не беше намерен."
                                 ));
 
+        User user = patient.getUser();
+
         patientRepository.delete(patient);
+
+        if (user != null) {
+
+            userRepository.delete(user);
+        }
     }
 
     /**
@@ -240,5 +248,43 @@ public class PatientServiceImpl implements PatientService {
         }
 
         return response;
+    }
+    @Override
+    public List<PatientResponse> getMyPatients() {
+
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        Doctor doctor =
+                doctorRepository.findAll()
+                        .stream()
+                        .filter(d ->
+                                d.getUser() != null &&
+                                        d.getUser().getId()
+                                                .equals(currentUser.getId())
+                        )
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Лекарят не беше намерен."
+                                ));
+
+        return patientRepository.findAll()
+                .stream()
+                .filter(patient ->
+                        patient.getPersonalDoctor() != null &&
+                                patient.getPersonalDoctor()
+                                        .getId()
+                                        .equals(doctor.getId())
+                )
+                .map(this::mapToResponse)
+                .toList();
     }
 }

@@ -179,7 +179,14 @@ public class DoctorServiceImpl implements DoctorService {
                                         "Лекарят не беше намерен."
                                 ));
 
+        User user = doctor.getUser();
+
         doctorRepository.delete(doctor);
+
+        if (user != null) {
+
+            userRepository.delete(user);
+        }
     }
 
     /**

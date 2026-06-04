@@ -6,7 +6,15 @@ import com.medicalrecords.entity.SickLeave;
 import com.medicalrecords.exception.ResourceNotFoundException;
 import com.medicalrecords.repository.ExaminationRepository;
 import com.medicalrecords.repository.SickLeaveRepository;
+import com.medicalrecords.repository.DoctorRepository;
+import com.medicalrecords.repository.UserRepository;
 import com.medicalrecords.service.SickLeaveService;
+import com.medicalrecords.entity.Doctor;
+import com.medicalrecords.entity.User;
+import com.medicalrecords.entity.enums.RoleType;
+import com.medicalrecords.exception.UnauthorizedOperationException;
+import com.medicalrecords.repository.UserRepository;
+import com.medicalrecords.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +29,8 @@ public class SickLeaveServiceImpl implements SickLeaveService {
 
     private final SickLeaveRepository sickLeaveRepository;
     private final ExaminationRepository examinationRepository;
+    private final UserRepository userRepository;
+    private final DoctorRepository doctorRepository;
 
     /**
      * Създава нов болничен лист.
@@ -134,6 +144,27 @@ public class SickLeaveServiceImpl implements SickLeaveService {
                                         "Болничният лист не беше намерен."
                                 ));
 
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        if (currentUser.getRole() == RoleType.ROLE_DOCTOR &&
+                !sickLeave.getDoctor()
+                        .getUser()
+                        .getId()
+                        .equals(currentUser.getId())) {
+
+            throw new UnauthorizedOperationException(
+                    "Нямате право да изтривате този болничен."
+            );
+        }
+
         sickLeaveRepository.delete(sickLeave);
     }
 
@@ -174,5 +205,42 @@ public class SickLeaveServiceImpl implements SickLeaveService {
         );
 
         return response;
+    }
+    @Override
+    public List<SickLeaveResponse> getMySickLeaves() {
+
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        Doctor doctor =
+                doctorRepository.findAll()
+                        .stream()
+                        .filter(d ->
+                                d.getUser() != null &&
+                                        d.getUser().getId()
+                                                .equals(currentUser.getId())
+                        )
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Лекарят не беше намерен."
+                                ));
+
+        return sickLeaveRepository.findAll()
+                .stream()
+                .filter(sickLeave ->
+                        sickLeave.getDoctor()
+                                .getId()
+                                .equals(doctor.getId())
+                )
+                .map(this::mapToResponse)
+                .toList();
     }
 }

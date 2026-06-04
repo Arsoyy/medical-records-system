@@ -79,4 +79,9 @@ public class PatientController {
 
         patientService.deletePatient(id);
     }
+    @GetMapping("/my")
+    public List<PatientResponse> getMyPatients() {
+
+        return patientService.getMyPatients();
+    }
 }

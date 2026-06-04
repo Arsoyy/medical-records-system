@@ -114,6 +114,8 @@
 
             <th>Specialty</th>
 
+            <th>Actions</th>
+
         </tr>
 
         </thead>
@@ -144,12 +146,29 @@
                 data.forEach(doctor => {
 
                     table.innerHTML += `
-                        <tr>
-                            <td>${doctor.id}</td>
-                            <td>${doctor.doctorIdentifier}</td>
-                            <td>${doctor.fullName}</td>
-                            <td>${doctor.specialty}</td>
-                        </tr>
+<tr>
+
+        <td>${doctor.id}</td>
+
+        <td>${doctor.doctorIdentifier}</td>
+
+        <td>${doctor.fullName}</td>
+
+        <td>${doctor.specialty}</td>
+
+        <td>
+
+            <button
+                class="btn btn-danger btn-sm"
+                onclick="deleteDoctor(${doctor.id})">
+
+                Delete
+
+            </button>
+
+        </td>
+
+    </tr>
                     `;
                 });
 
@@ -212,6 +231,41 @@
                 });
 
         });
+    function deleteDoctor(id) {
+
+        if (!confirm(
+            'Delete this doctor?'
+        )) {
+
+            return;
+        }
+
+        fetch('/api/doctors/' + id, {
+
+            method: 'DELETE'
+
+        })
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'Delete failed'
+                    );
+                }
+
+                loadDoctors();
+
+            })
+            .catch(error => {
+
+                console.error(error);
+
+                alert(
+                    'Error deleting doctor'
+                );
+            });
+    }
 
 </script>
 

@@ -79,4 +79,10 @@ public class SickLeaveController {
 
         sickLeaveService.deleteSickLeave(id);
     }
+    @GetMapping("/my")
+    public List<SickLeaveResponse> getMySickLeaves() {
+
+        return sickLeaveService
+                .getMySickLeaves();
+    }
 }

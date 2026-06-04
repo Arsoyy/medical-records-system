@@ -38,4 +38,6 @@ public interface SickLeaveService {
      * Изтрива болничен лист.
      */
     void deleteSickLeave(Long id);
+
+    List<SickLeaveResponse> getMySickLeaves();
 }

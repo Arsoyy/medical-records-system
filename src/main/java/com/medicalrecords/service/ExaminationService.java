@@ -16,6 +16,8 @@ public interface ExaminationService {
             ExaminationCreateRequest request
     );
 
+    List<ExaminationResponse> getMyDoctorExaminations();
+
     List<ExaminationResponse> getMyExaminations();
 
     /**
@@ -40,4 +42,8 @@ public interface ExaminationService {
      * Изтрива преглед.
      */
     void deleteExamination(Long id);
+
+    ExaminationResponse createExaminationAsDoctor(
+            ExaminationCreateRequest request
+    );
 }

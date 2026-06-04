@@ -122,6 +122,8 @@
 
             <th>Payment</th>
 
+            <th>Actions</th>
+
         </tr>
         </thead>
 
@@ -225,16 +227,37 @@
                 data.forEach(examination => {
 
                     table.innerHTML += `
-                        <tr>
-                            <td>${examination.id}</td>
-                            <td>${examination.examinationDate}</td>
-                            <td>${examination.doctorName}</td>
-                            <td>${examination.patientName}</td>
-                            <td>${examination.diagnosisName}</td>
-                            <td>${examination.treatment}</td>
-                            <td>${examination.price}</td>
-                            <td>${examination.paymentType}</td>
-                        </tr>
+    <tr>
+
+        <td>${examination.id}</td>
+
+        <td>${examination.examinationDate}</td>
+
+        <td>${examination.doctorName}</td>
+
+        <td>${examination.patientName}</td>
+
+        <td>${examination.diagnosisName}</td>
+
+        <td>${examination.treatment}</td>
+
+        <td>${examination.price}</td>
+
+        <td>${examination.paymentType}</td>
+
+        <td>
+
+            <button
+                class="btn btn-danger btn-sm"
+                onclick="deleteExamination(${examination.id})">
+
+                Delete
+
+            </button>
+
+        </td>
+
+    </tr>
                     `;
                 });
 
@@ -309,7 +332,41 @@
                 });
 
         });
+    function deleteExamination(id) {
 
+        if (!confirm(
+            'Delete this examination?'
+        )) {
+
+            return;
+        }
+
+        fetch('/api/examinations/' + id, {
+
+            method: 'DELETE'
+
+        })
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'Delete failed'
+                    );
+                }
+
+                loadExaminations();
+
+            })
+            .catch(error => {
+
+                console.error(error);
+
+                alert(
+                    'Error deleting examination'
+                );
+            });
+    }
 </script>
 
 </body>
