@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <title>Diagnoses</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+</head>
+<body>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between">
+
+        <h2>Diagnoses</h2>
+
+        <a href="/"
+           class="btn btn-secondary">
+            Home
+        </a>
+
+    </div>
+
+    <hr>
+
+    <h4>Add Diagnosis</h4>
+
+    <form id="diagnosisForm">
+
+        <div class="mb-3">
+            <label class="form-label">Code</label>
+            <input type="text"
+                   id="code"
+                   class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text"
+                   id="name"
+                   class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea id="description"
+                      class="form-control"></textarea>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Add Diagnosis
+        </button>
+
+    </form>
+
+    <hr>
+
+    <table class="table table-bordered">
+
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+
+        <tbody id="diagnosesTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+    loadDiagnoses();
+
+    function loadDiagnoses() {
+
+        fetch('/api/diagnoses')
+            .then(response => response.json())
+            .then(data => {
+
+                let table =
+                    document.getElementById(
+                        'diagnosesTable'
+                    );
+
+                table.innerHTML = '';
+
+                data.forEach(diagnosis => {
+
+                    table.innerHTML += `
+                        <tr>
+                            <td>${diagnosis.id}</td>
+                            <td>${diagnosis.code}</td>
+                            <td>${diagnosis.name}</td>
+                            <td>${diagnosis.description}</td>
+                        </tr>
+                    `;
+                });
+
+            });
+    }
+
+    document.getElementById('diagnosisForm')
+        .addEventListener('submit', function(event) {
+
+            event.preventDefault();
+
+            let diagnosis = {
+
+                code:
+                document.getElementById(
+                    'code'
+                ).value,
+
+                name:
+                document.getElementById(
+                    'name'
+                ).value,
+
+                description:
+                document.getElementById(
+                    'description'
+                ).value
+            };
+
+            fetch('/api/diagnoses', {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body:
+                    JSON.stringify(diagnosis)
+
+            })
+                .then(() => {
+
+                    document.getElementById(
+                        'diagnosisForm'
+                    ).reset();
+
+                    loadDiagnoses();
+
+                });
+
+        });
+
+</script>
+
+</body>
+</html>

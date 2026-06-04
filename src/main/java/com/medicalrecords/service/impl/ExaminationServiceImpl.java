@@ -8,6 +8,9 @@ import com.medicalrecords.repository.*;
 import com.medicalrecords.service.ExaminationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.medicalrecords.entity.enums.RoleType;
+import com.medicalrecords.exception.UnauthorizedOperationException;
+import com.medicalrecords.util.SecurityUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +26,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final DiagnosisRepository diagnosisRepository;
+    private final UserRepository userRepository;
 
     /**
      * Създава нов преглед.
@@ -128,6 +132,29 @@ public class ExaminationServiceImpl implements ExaminationService {
                                         "Прегледът не беше намерен."
                                 ));
 
+        // Взимане на логнатия потребител
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        // Лекарят може да редактира само свои прегледи
+        if (currentUser.getRole() == RoleType.ROLE_DOCTOR &&
+                !examination.getDoctor()
+                        .getUser()
+                        .getId()
+                        .equals(currentUser.getId())) {
+
+            throw new UnauthorizedOperationException(
+                    "Нямате право да редактирате този преглед."
+            );
+        }
+
         Diagnosis diagnosis =
                 diagnosisRepository.findById(
                                 request.getDiagnosisId())
@@ -136,9 +163,7 @@ public class ExaminationServiceImpl implements ExaminationService {
                                         "Диагнозата не беше намерена."
                                 ));
 
-        examination.setDiagnosis(
-                diagnosis
-        );
+        examination.setDiagnosis(diagnosis);
 
         examination.setTreatment(
                 request.getTreatment()
@@ -174,7 +199,71 @@ public class ExaminationServiceImpl implements ExaminationService {
                                         "Прегледът не беше намерен."
                                 ));
 
+        // Взимане на логнатия потребител
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        // Лекарят може да изтрива само свои прегледи
+        if (currentUser.getRole() == RoleType.ROLE_DOCTOR &&
+                !examination.getDoctor()
+                        .getUser()
+                        .getId()
+                        .equals(currentUser.getId())) {
+
+            throw new UnauthorizedOperationException(
+                    "Нямате право да изтривате този преглед."
+            );
+        }
+
         examinationRepository.delete(examination);
+    }
+
+    /**
+     * Връща прегледите на логнатия пациент.
+     */
+    @Override
+    public List<ExaminationResponse> getMyExaminations() {
+
+        String username =
+                SecurityUtil.getCurrentUsername();
+
+        User currentUser =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Потребителят не беше намерен."
+                                ));
+
+        Patient patient =
+                patientRepository.findAll()
+                        .stream()
+                        .filter(p ->
+                                p.getUser() != null &&
+                                        p.getUser().getId()
+                                                .equals(currentUser.getId())
+                        )
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Пациентът не беше намерен."
+                                ));
+
+        return examinationRepository.findAll()
+                .stream()
+                .filter(examination ->
+                        examination.getPatient()
+                                .getId()
+                                .equals(patient.getId())
+                )
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**

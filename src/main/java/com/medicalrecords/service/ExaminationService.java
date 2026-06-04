@@ -16,6 +16,8 @@ public interface ExaminationService {
             ExaminationCreateRequest request
     );
 
+    List<ExaminationResponse> getMyExaminations();
+
     /**
      * Връща всички прегледи.
      */

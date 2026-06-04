@@ -79,4 +79,12 @@ public class ExaminationController {
 
         examinationService.deleteExamination(id);
     }
+    /**
+     * Връща прегледите на логнатия пациент.
+     */
+    @GetMapping("/my")
+    public List<ExaminationResponse> getMyExaminations() {
+
+        return examinationService.getMyExaminations();
+    }
 }

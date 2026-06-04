@@ -1,7 +1,8 @@
 package com.medicalrecords.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,51 +12,71 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Главна конфигурация за Spring Security.
+ * Конфигурация на Spring Security.
  */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     /**
-     * Конфигурация на security filter chain.
+     * Конфигурира защитата на приложението.
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
         http
-                // Изключваме CSRF за REST API
                 .csrf(csrf -> csrf.disable())
 
-                // Stateless authentication (JWT)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
                 )
 
-                // Конфигурация на endpoint permissions
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Само ADMIN има достъп до лекарите
+                        .requestMatchers("/api/doctors/**")
+                        .hasRole("ADMIN")
 
-                        .requestMatchers("/api/doctors/**").permitAll()
+                        .requestMatchers("/api/examinations/my")
+                        .hasRole("PATIENT")
 
-                        .anyRequest().authenticated()
-                );
+                        // ADMIN и DOCTOR
+                        .requestMatchers(
+                                "/api/patients/**",
+                                "/api/diagnoses/**",
+                                "/api/examinations/**",
+                                "/api/sick-leaves/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCTOR"
+                        )
+
+                        .anyRequest()
+                        .authenticated()
+                )
+
+                // HTTP Basic Authentication
+                .httpBasic(httpBasic -> {});
 
         return http.build();
     }
 
     /**
-     * Password encoder за криптиране на пароли.
+     * Password encoder.
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return new BCryptPasswordEncoder();
     }
 
     /**
-     * Authentication manager bean.
+     * Authentication manager.
      */
     @Bean
     public AuthenticationManager authenticationManager(
